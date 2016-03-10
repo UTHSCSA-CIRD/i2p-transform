@@ -8,7 +8,7 @@ i2b2 as (
   select count(distinct patient_num) qty from i2b2fact 
   where concept_cd in (
     select concept_cd from "&&i2b2_data_schema".concept_dimension 
-    where concept_path like '\i2b2\Diagnoses\ICD9\%'
+    where concept_path like '\i2b2\Diagnoses\%'
     )
   ),
 diff as (

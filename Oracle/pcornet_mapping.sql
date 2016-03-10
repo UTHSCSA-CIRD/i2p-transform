@@ -114,11 +114,11 @@ with terms_dxi as (
     "&&i2b2_meta_schema"."&&terms_table" ht
   -- TODO: Stop cheating by going back to Clarity
   left join clarity.edg_current_icd9@id cicd on to_char(cicd.dx_id) = replace(ht.c_basecode, 'KUH|DX_ID:', '')
-  where c_fullname like '\i2b2\Diagnoses\ICD9\%' order by c_hlevel 
+  where c_fullname like '\i2b2\Diagnoses\%' order by c_hlevel 
   )
 select
   td.c_hlevel, 
-  replace(td.c_fullname, '\i2b2\Diagnoses\ICD9\', '\PCORI\DIAGNOSIS\09\') c_fullname, 
+  replace(td.c_fullname, '\i2b2\Diagnoses\', '\PCORI\DIAGNOSIS\09\') c_fullname, 
   td.c_name, td.c_synonym_cd, td.c_visualattributes,
   td.c_totalnum, td.c_basecode, td.c_metadataxml, td.c_facttablecolumn, td.c_tablename, 
   td.c_columnname, td.c_columndatatype, td.c_operator, td.c_dimcode, td.c_comment, 
