@@ -15,11 +15,74 @@ pcori_path,local_path
 \PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Other\
 \PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Caucasian\
 \PCORI\DEMOGRAPHIC\HISPANIC\Y\,\i2b2\Demographics\Ethnicity\Hispanic or Latino\
-\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\ENC_TYPE\AV\
-\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\ENC_TYPE\AV\
-\PCORI\ENCOUNTER\ENC_TYPE\ED\,\i2b2\Visit Details\ENC_TYPE\ED\
-\PCORI\ENCOUNTER\ENC_TYPE\IP\,\i2b2\Visit Details\ENC_TYPE\IP\
-\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\ENC_TYPE\OT\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Office Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Hospital\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Abstract\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Anti-Coag Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Prenatal visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Ophth office visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Confidential\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Radiology Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Initial Prenatal \
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Follow Up Prenatal\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Gynecology\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\REI\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Procedure\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Home Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Assisted Living Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Nursing Home Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Consult\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Therapy Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Device Analysis\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Hospital Office Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Hospital Op Note\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Hospital Discharge\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Ophth Non-Scheduled Office Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Infusion Office Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\IP\,\i2b2\Visit Details\Encounter Type\Hospital IP Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Patient Email\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Patient Outreach\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Telephone\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Refill\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\History\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Orders Only\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Message Encounter\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Nurse Only\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Clinical Support\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Quest Interface\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Release Order\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Anti-Coag Tracking Only\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Infertility Lab\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\SoftLab Interface\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Pre-Op Intake\
+\PCORI\ENCOUNTER\ENC_TYPE\OA\,\i2b2\Visit Details\Encounter Type\Infusion Clinical Support\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Hospital Encounter\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Unmerge\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Contact Moved\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Wait List\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Appointment\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Consent Form\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Letter (Out)\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\BPA\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Release of Information\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Scanned Results\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,"\i2b2\Visit Details\Encounter Type\H&P, Hospital\"
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,"\i2b2\Visit Details\Encounter Type\Discharge Summary, Hospital\"
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,"\i2b2\Visit Details\Encounter Type\Operative/ Procedure Note, Hospital\"
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,"\i2b2\Visit Details\Encounter Type\Consult, Hospital\"
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\External Medical Records\
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,"\i2b2\Visit Details\Encounter Type\Diagnostic Testing, Hospital\"
+\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Tumor Board\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\Encounter Type Not Recorded\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\Health Maintenance Letter\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\Questionnaire Series Submission\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\Hospital ER Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\Hospital OP Visit\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\RO Therapy Summary\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\RO Quality Assurance Note\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\RO Treatment Plan\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\RO Status Update\
+\PCORI\ENCOUNTER\ENC_TYPE\UN\,\i2b2\Visit Details\Encounter Type\REI Procedure Visits\
 \PCORI\DEMOGRAPHIC\SEX\F\,\i2b2\Demographics\Gender\Female\
 \PCORI\DEMOGRAPHIC\SEX\M\,\i2b2\Demographics\Gender\Male\
 \PCORI\DEMOGRAPHIC\SEX\NI\,\i2b2\Demographics\Gender\Unknown\Unknown-@\
