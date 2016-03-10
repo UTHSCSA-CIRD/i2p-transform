@@ -1067,7 +1067,8 @@ sqltext := 'insert into diagnosis (patid,			encounterid,	enc_type, admit_date, p
 'and factline.start_date=pdxfact.start_Date '||
 'inner join pcornet_diag diag on diag.c_basecode  = factline.concept_cd '||
 'where diag.c_fullname like ''\PCORI\DIAGNOSIS\%''  '||
-'and (sourcefact.c_fullname like ''\PCORI_MOD\CONDITION_OR_DX\DX_SOURCE\%'' or sourcefact.c_fullname is null) ';
+'and (sourcefact.c_fullname like ''\PCORI_MOD\CONDITION_OR_DX\DX_SOURCE\%'' or sourcefact.c_fullname is null) ' ||
+'and diag.pcori_basecode is not null';
 
 PMN_EXECUATESQL(sqltext);
 
