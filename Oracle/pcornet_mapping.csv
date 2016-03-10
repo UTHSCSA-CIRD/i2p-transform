@@ -116,44 +116,5 @@ pcori_path,local_path
 \PCORI\VITAL\TOBACCO\SMOKING\YES\07\,\i2b2\History\Social History\Tobacco Usage\Smoking Tobacco Use\Heavy Tobacco Smoker\
 \PCORI\VITAL\TOBACCO\SMOKING\YES\08\,\i2b2\History\Social History\Tobacco Usage\Smoking Tobacco Use\Light Tobacco Smoker\
 \PCORI\ENCOUNTER\DISCHARGE_DISPOSITION\NI\,\i2b2\Visit Details\Discharge Disposition Codes\0\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\IP\,\i2b2\Visit Details\Discharge Disposition Codes\253\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\SH\,\i2b2\Visit Details\Discharge Disposition Codes\09\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\67\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\256\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\257\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\369\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\66\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\11\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\251\
 \PCORI\ENCOUNTER\DISCHARGE_STATUS\NI\,\i2b2\Visit Details\Discharge Disposition Codes\0\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\260\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\200\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\100\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\43\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HH\,\i2b2\Visit Details\Discharge Disposition Codes\06\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HO\,\i2b2\Visit Details\Discharge Disposition Codes\01\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HS\,\i2b2\Visit Details\Discharge Disposition Codes\261\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HS\,\i2b2\Visit Details\Discharge Disposition Codes\50\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HS\,\i2b2\Visit Details\Discharge Disposition Codes\51\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\RH\,\i2b2\Visit Details\Discharge Disposition Codes\68\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\254\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\259\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\RH\,\i2b2\Visit Details\Discharge Disposition Codes\258\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\AM\,\i2b2\Visit Details\Discharge Disposition Codes\07\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\AW\,\i2b2\Visit Details\Discharge Disposition Codes\15\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\AW\,\i2b2\Visit Details\Discharge Disposition Codes\366\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\IP\,\i2b2\Visit Details\Discharge Disposition Codes\262\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\IP\,\i2b2\Visit Details\Discharge Disposition Codes\63\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\NH\,\i2b2\Visit Details\Discharge Disposition Codes\64\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\255\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\RH\,\i2b2\Visit Details\Discharge Disposition Codes\264\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\OT\,\i2b2\Visit Details\Discharge Disposition Codes\65\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\RH\,\i2b2\Visit Details\Discharge Disposition Codes\62\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HO\,\i2b2\Visit Details\Discharge Disposition Codes\250\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\IP\,\i2b2\Visit Details\Discharge Disposition Codes\02\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\NH\,\i2b2\Visit Details\Discharge Disposition Codes\03\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\SH\,\i2b2\Visit Details\Discharge Disposition Codes\30\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\IP\,\i2b2\Visit Details\Discharge Disposition Codes\263\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HH\,\i2b2\Visit Details\Discharge Disposition Codes\252\
-\PCORI\ENCOUNTER\DISCHARGE_STATUS\HS\,\i2b2\Visit Details\Discharge Disposition Codes\365\
 \PCORI\ENCOUNTER\DRG_TYPE\02\,\i2b2\UHC\Diagnosis\Base MS DRG\
