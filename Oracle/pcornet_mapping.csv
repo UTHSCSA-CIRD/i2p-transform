@@ -87,15 +87,18 @@ pcori_path,local_path
 \PCORI\DEMOGRAPHIC\SEX\M\,\i2b2\Demographics\Gender\Male\
 \PCORI\DEMOGRAPHIC\SEX\NI\,\i2b2\Demographics\Gender\Unknown\Unknown-@\
 \PCORI\DEMOGRAPHIC\SEX\UN\,\i2b2\Demographics\Gender\Unknown\Unknown-U\
-\PCORI\DEMOGRAPHIC\RACE\01\,\i2b2\Demographics\Race\American Indian or Alaskan Native\
+\PCORI\DEMOGRAPHIC\RACE\01\,\i2b2\Demographics\Race\American Indian or Alaska Native\
 \PCORI\DEMOGRAPHIC\RACE\02\,\i2b2\Demographics\Race\Asian\
-\PCORI\DEMOGRAPHIC\RACE\03\,\i2b2\Demographics\Race\Black or African American\
-\PCORI\DEMOGRAPHIC\RACE\06\,\i2b2\Demographics\Race\Two Races\
-\PCORI\DEMOGRAPHIC\RACE\04\,\i2b2\Demographics\Race\Native Hawaiian or Other Pacific Islander\
-\PCORI\DEMOGRAPHIC\RACE\NI\,\i2b2\Demographics\Race\Not Recorded\
-\PCORI\DEMOGRAPHIC\RACE\OT\,\i2b2\Demographics\Race\Other\
-\PCORI\DEMOGRAPHIC\RACE\07\,\i2b2\Demographics\Race\Declined\
+\PCORI\DEMOGRAPHIC\RACE\03\,\i2b2\Demographics\Race\Black or African-American\
+\PCORI\DEMOGRAPHIC\RACE\04\,\i2b2\Demographics\Race\Native Hawaiian and Other Pacific Islander\
 \PCORI\DEMOGRAPHIC\RACE\05\,\i2b2\Demographics\Race\White or Caucasian\
+\PCORI\DEMOGRAPHIC\RACE\06\,\i2b2\Demographics\Race\More Than One Race\
+\PCORI\DEMOGRAPHIC\RACE\07\,\i2b2\Demographics\Race\Patient Refused\
+\PCORI\DEMOGRAPHIC\RACE\07\,\i2b2\Demographics\Race\I choose not to provide this information\
+\PCORI\DEMOGRAPHIC\RACE\NI\,\i2b2\Demographics\Race\Not Recorded\
+\PCORI\DEMOGRAPHIC\RACE\OT\,\i2b2\Demographics\Race\Unknown/Other\
+\PCORI\DEMOGRAPHIC\RACE\OT\,\i2b2\Demographics\Race\Unknown\
+\PCORI\DEMOGRAPHIC\RACE\OT\,\i2b2\Demographics\Race\Other\
 \PCORI\DIAGNOSIS\DX_TYPE\09\,\i2b2\Diagnoses\
 \PCORI\PROCEDURE\PX_TYPE\C4\,\i2b2\Procedures\PRC\Metathesaurus CPT Hierarchical Terms\
 \PCORI\PROCEDURE\PX_TYPE\09\,\i2b2\Procedures\PRC\ICD9 (Inpatient)\
