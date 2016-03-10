@@ -3,12 +3,18 @@ pcori_path,local_path
 \PCORI_MOD\CONDITION_OR_DX\DX_SOURCE\DI\,\Diagnosis\\modifier_dx\billing_diagnosis\discharge\
 \PCORI_MOD\CONDITION_OR_DX\DX_SOURCE\AD\,\Diagnosis\\modifier_dx\billing_diagnosis\admit\
 \PCORI\DEMOGRAPHIC\BIOBANK_FLAG\Y\,\i2b2\Specimens\
-\PCORI\DEMOGRAPHIC\HISPANIC\N\,"\i2b2\Demographics\Ethnicity\Non Hispanic, Latino or Spanish Origin\"
+\PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\Patient Refused\
+\PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\I choose not to provide this information\
+\PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\Not Recorded\Other-o\
 \PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\Not Recorded\
+\PCORI\DEMOGRAPHIC\HISPANIC\N\,\i2b2\Demographics\Ethnicity\Non-Hispanic or Non-Latino\
+\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Unknown\
+\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Unknown/Other\
+\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\African-American\
+\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Asian-American\
 \PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Other\
-\PCORI\DEMOGRAPHIC\HISPANIC\Y\,\i2b2\Demographics\Ethnicity\Hispanic\
+\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Caucasian\
 \PCORI\DEMOGRAPHIC\HISPANIC\Y\,\i2b2\Demographics\Ethnicity\Hispanic or Latino\
-\PCORI\DEMOGRAPHIC\HISPANIC\Y\,"\i2b2\Demographics\Ethnicity\Hispanic, Latino or Spanish Origin\"
 \PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\ENC_TYPE\AV\
 \PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\ENC_TYPE\AV\
 \PCORI\ENCOUNTER\ENC_TYPE\ED\,\i2b2\Visit Details\ENC_TYPE\ED\
