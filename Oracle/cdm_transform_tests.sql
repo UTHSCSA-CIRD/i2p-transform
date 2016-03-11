@@ -6,6 +6,7 @@ with cdm as (
   ),
 i2b2 as (
   select count(distinct patient_num) qty from i2b2fact 
+  join encounter on encounter.patid = i2b2fact.patient_num and encounter.encounterid = i2b2fact.encounter_num
   where concept_cd in (
     select concept_cd from "&&i2b2_data_schema".concept_dimension 
     where concept_path like '\i2b2\Diagnoses\%'
@@ -26,6 +27,7 @@ with cdm as (
 i2b2 as (
   select count(distinct patient_num) qty from (
     select * from i2b2fact 
+    join encounter on encounter.patid = i2b2fact.patient_num and encounter.encounterid = i2b2fact.encounter_num
     where concept_cd in (
       select concept_cd from "&&i2b2_data_schema".concept_dimension 
       where concept_path like '\i2b2\Procedures\%'
