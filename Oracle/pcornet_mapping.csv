@@ -10,10 +10,10 @@ pcori_path,local_path
 \PCORI\DEMOGRAPHIC\HISPANIC\N\,\i2b2\Demographics\Ethnicity\Non-Hispanic or Non-Latino\
 \PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Unknown\
 \PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Unknown/Other\
-\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\African-American\
-\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Asian-American\
+\PCORI\DEMOGRAPHIC\HISPANIC\N\,\i2b2\Demographics\Ethnicity\African-American\
+\PCORI\DEMOGRAPHIC\HISPANIC\N\,\i2b2\Demographics\Ethnicity\Asian-American\
 \PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Other\
-\PCORI\DEMOGRAPHIC\HISPANIC\OT\,\i2b2\Demographics\Ethnicity\Caucasian\
+\PCORI\DEMOGRAPHIC\HISPANIC\N\,\i2b2\Demographics\Ethnicity\Caucasian\
 \PCORI\DEMOGRAPHIC\HISPANIC\Y\,\i2b2\Demographics\Ethnicity\Hispanic or Latino\
 \PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Office Visit\
 \PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Hospital\
