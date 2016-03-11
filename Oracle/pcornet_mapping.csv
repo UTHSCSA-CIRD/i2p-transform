@@ -3,7 +3,7 @@ pcori_path,local_path
 \PCORI_MOD\CONDITION_OR_DX\DX_SOURCE\DI\,\Diagnosis\\modifier_dx\billing_diagnosis\discharge\
 \PCORI_MOD\CONDITION_OR_DX\DX_SOURCE\AD\,\Diagnosis\\modifier_dx\billing_diagnosis\admit\
 \PCORI\DEMOGRAPHIC\BIOBANK_FLAG\Y\,\i2b2\Specimens\
-\PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\Patient Refused\
+\PCORI\DEMOGRAPHIC\HISPANIC\R\,\i2b2\Demographics\Ethnicity\Patient Refused\
 \PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\I choose not to provide this information\
 \PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\Not Recorded\Other-o\
 \PCORI\DEMOGRAPHIC\HISPANIC\NI\,\i2b2\Demographics\Ethnicity\Not Recorded\
