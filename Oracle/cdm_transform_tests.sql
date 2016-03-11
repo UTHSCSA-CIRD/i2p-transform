@@ -73,7 +73,7 @@ diff as (
 select case when diff.pct > 10 then 1/0 else 1 end hisp_n_pat_count_ok from diff;
 
 -- Make sure we have some diagnosis source information 
-select case when count(*) < 3 then 1/0 else 1 end a_few_dx_sources from (
+select case when count(*) < 2 then 1/0 else 1 end a_few_dx_sources from (
   select distinct dx_source from diagnosis
   );
 
