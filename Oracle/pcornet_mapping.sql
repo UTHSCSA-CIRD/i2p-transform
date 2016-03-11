@@ -226,7 +226,7 @@ where c_fullname like '\PCORI\PROCEDURE\HC\%'
 insert into "&&i2b2_meta_schema".PCORNET_PROC
 select
   ht.c_hlevel,
-  replace(ht.c_fullname, '\i2b2\Procedures\PRC\Metathesaurus HCPCS Hierarchical Terms', '\PCORI\PROCEDURE\C4') c_fullname,
+  replace(ht.c_fullname, '\i2b2\Procedures\PRC\Metathesaurus HCPCS Hierarchical Terms', '\PCORI\PROCEDURE\HC') c_fullname,
   ht.c_name, ht.c_synonym_cd, ht.c_visualattributes,
   ht.c_totalnum, ht.c_basecode, ht.c_metadataxml, ht.c_facttablecolumn, ht.c_tablename,
   ht.c_columnname, ht.c_columndatatype, ht.c_operator, ht.c_dimcode, ht.c_comment,
