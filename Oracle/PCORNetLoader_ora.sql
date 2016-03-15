@@ -991,9 +991,9 @@ select distinct v.patient_num, v.encounter_num,
 	end_Date, 
 	to_char(end_Date,'HH:MI'), 
 	'NI' providerid, --See TODO above
-  'NI' location_zip, /* See TODO above */
+  null location_zip, /* See TODO above */
 (case when pcori_enctype is not null then pcori_enctype else 'UN' end) enc_type, 
-  'NI' facility_id,  /* See TODO above */
+  null facility_id,  /* See TODO above */
   'NI' discharge_disposition /*CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE  discharge_disposition END*/ , 
   'NI' discharge_status /* See TODO above CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE discharge_status END*/ , 
   drg.drg, drg_type, 'NI' admitting_source /* see TODO above CASE WHEN _source IS NULL THEN 'NI' ELSE admitting_source END*/
