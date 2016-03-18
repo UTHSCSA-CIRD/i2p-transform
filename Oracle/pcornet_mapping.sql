@@ -10,6 +10,9 @@ set echo on;
 delete 
 from "&&i2b2_meta_schema".PCORNET_VITAL where sourcesystem_cd='MAPPING';
 
+delete 
+from "&&i2b2_meta_schema".PCORNET_ENC where sourcesystem_cd='MAPPING';
+
 insert into "&&i2b2_meta_schema".PCORNET_VITAL
 SELECT PCORNET_VITAL.C_HLEVEL+1,
   PCORNET_VITAL.C_FULLNAME || i2b2.c_basecode || '\' as  C_FULLNAME,
@@ -236,4 +239,94 @@ select
 from
   "&&i2b2_meta_schema"."&&terms_table" ht
 where c_fullname like '\i2b2\Procedures\PRC\Metathesaurus HCPCS Hierarchical Terms\%' order by c_hlevel
+;
+
+
+/* MS-DRGs
+*/
+delete 
+from "&&i2b2_meta_schema".PCORNET_ENC
+where c_fullname like '\PCORI\ENCOUNTER\DRG\02\%'
+;
+
+insert into "&&i2b2_meta_schema".PCORNET_ENC
+with drg_path_map as (
+  select local_path, local_path || '%' like_local_path, pcori_path, pcori_path || '%' like_pcori_path
+  from pcornet_mapping where pcori_path like '\PCORI\ENCOUNTER\DRG\02\%'
+  )
+select 
+  ht.c_hlevel, 
+  replace(ht.c_fullname, pm.local_path, pm.pcori_path) c_fullname, 
+  ht.c_name, ht.c_synonym_cd, ht.c_visualattributes,
+  ht.c_totalnum, ht.c_basecode, ht.c_metadataxml, ht.c_facttablecolumn, ht.c_tablename, 
+  ht.c_columnname, ht.c_columndatatype, ht.c_operator, ht.c_dimcode, ht.c_comment, 
+  ht.c_tooltip, ht.m_applied_path, ht.update_date, ht.download_date, ht.import_date, 
+  ht.sourcesystem_cd, ht.valuetype_cd, ht.m_exclusion_cd, ht.c_path, ht.c_symbol,
+  case when ht.c_basecode is not null 
+    then 'MSDRG:' || lpad(substr(ht.c_basecode, instr(ht.c_basecode, ':') + 1), 3, '0')
+  end pcori_basecode
+from 
+  "&&i2b2_meta_schema"."&&terms_table" ht
+cross join drg_path_map pm
+where c_fullname like pm.like_local_path
+--order by c_hlevel 
+;
+
+/* The following is good for eyeballing the DRG alignment - the names seem to
+match exactly between UHC and the PCORNet ontology.
+*/
+/*
+with drg_path_map as (
+  select local_path, local_path || '%' like_local_path, pcori_path, pcori_path || '%' like_pcori_path
+  from pcornet_mapping where pcori_path like '\PCORI\ENCOUNTER\DRG\02\%'
+  ),
+pcornet_drgs as (
+  select replace(pe.pcori_basecode, 'MSDRG:', '') drg_code, pe.* 
+  from "&&i2b2_meta_schema".pcornet_enc pe
+  cross join drg_path_map dm
+  where pe.c_fullname like dm.like_pcori_path
+  ),
+local_drgs as (
+  select
+    replace(ht.c_basecode, 'UHC|UHCMSDRG:', '') drg_code, ht.*
+  from "&&i2b2_meta_schema"."&&terms_table" ht 
+  cross join drg_path_map dm
+  where ht.c_fullname like dm.like_local_path
+  )
+select pd.drg_code, pd.c_name, ld.c_name from pcornet_drgs pd
+join local_drgs ld on ld.drg_code = pd.drg_code;
+*/
+
+/* Admitting source: For i2p-transform, these values go in the visit dimension.
+To make them queryable from the web interface, insert the local terms under the
+PCORI parent.
+*/
+
+
+create or replace view admit_src_path_map as
+select local_path, local_path || '%' like_local_path, pcori_path, pcori_path || '%' like_pcori_path
+from pcornet_mapping where pcori_path like '\PCORI\ENCOUNTER\ADMITTING_SOURCE\%'
+;
+
+update "&&i2b2_meta_schema".PCORNET_ENC
+set c_visualattributes = 'FA' where c_fullname in (
+  select pcori_path from admit_src_path_map
+  );
+  
+insert into "&&i2b2_meta_schema".PCORNET_ENC
+select 
+  pe.c_hlevel + 1 c_hlevel,
+  pm.pcori_path || ht.c_basecode || '\' c_fullname,
+  ht.c_name, ht.c_synonym_cd, ht.c_visualattributes,
+  ht.c_totalnum, ht.c_basecode, ht.c_metadataxml, ht.c_facttablecolumn, ht.c_tablename, 
+  ht.c_columnname, ht.c_columndatatype, ht.c_operator, ht.c_dimcode, ht.c_comment, 
+  ht.c_tooltip, ht.m_applied_path, ht.update_date, ht.download_date, ht.import_date, 
+  'MAPPING' sourcesystem_cd, ht.valuetype_cd, ht.m_exclusion_cd, ht.c_path, ht.c_symbol,
+  pe.pcori_basecode
+from 
+  "&&i2b2_meta_schema"."&&terms_table" ht
+cross join admit_src_path_map pm
+join "&&i2b2_meta_schema".pcornet_enc pe on pe.c_fullname = pm.pcori_path
+where ht.c_fullname like pm.like_local_path
+order by c_hlevel
 ;

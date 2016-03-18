@@ -947,26 +947,6 @@ end PCORNetDemographic;
 
 
 /* TODOs: 
-
-1)
-Figure out what "_source" is supposed to be.  I'ts an invalid name in
-oracle as-is.  And, I don't see where it comes from - the tables were selecting 
-from don't have it.
-
-Error(16,266): PL/SQL: ORA-00911: invalid character
-00911. 00000 -  "invalid character"
-*Cause:    identifiers may not start with any ASCII character other than
-           letters and numbers.  $#_ are also allowed after the first
-           character.
-           
-Commented out that and what it's used for (ADMITTING_SOURCE)
-
-2)
-ORA-00904: "DISCHARGE_STATUS": invalid identifier
-
-3)
-ORA-00904: "DISCHARGE_DISPOSITION": invalid identifier
-
 4)
 ORA-00904: "FACILITY_ID": invalid identifier
 
@@ -991,9 +971,10 @@ select distinct v.patient_num, v.encounter_num,
   null location_zip, /* See TODO above */
 (case when pcori_enctype is not null then pcori_enctype else 'UN' end) enc_type, 
   null facility_id,  /* See TODO above */
-  'NI' discharge_disposition /*CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE  discharge_disposition END*/ , 
-  'NI' discharge_status /* See TODO above CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE discharge_status END*/ , 
-  drg.drg, drg_type, 'NI' admitting_source /* see TODO above CASE WHEN _source IS NULL THEN 'NI' ELSE admitting_source END*/
+  CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE  discharge_disposition END, 
+  CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE discharge_status END, 
+  drg.drg, drg_type, 
+  CASE WHEN admitting_source IS NULL THEN 'NI' ELSE admitting_source END admitting_source
 from i2b2visit v inner join demographic d on v.patient_num=d.patid
 left outer join 
    (select * from
