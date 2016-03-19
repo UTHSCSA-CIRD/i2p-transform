@@ -23,7 +23,7 @@ set -e
 
 # Run some tests
 sqlplus /nolog <<EOF
-connect ${pcornet_cdm_user}/${pcornet_cdm}
+connect ${pcornet_cdm_user}@${sid}/${pcornet_cdm}
 
 set echo on;
 
@@ -49,7 +49,7 @@ EOF
 
 # Insert local terms as leaves of the PCORNet terms and run the transform
 sqlplus /nolog <<EOF
-connect ${pcornet_cdm_user}/${pcornet_cdm}
+connect ${pcornet_cdm_user}@${sid}/${pcornet_cdm}
 
 set echo on;
 set timing on;

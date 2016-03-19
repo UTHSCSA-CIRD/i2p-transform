@@ -2,6 +2,7 @@
 set -e
 
 # Expected environment variables (put there by Jenkins, etc.)
+# export sid=
 # export pcornet_cdm_user=
 # export pcornet_cdm=
 # export i2b2_data_schema=
@@ -10,7 +11,7 @@ set -e
 . ./load_pcornet_mapping.sh
 
 sqlplus /nolog <<EOF
-connect ${pcornet_cdm_user}/${pcornet_cdm}
+connect ${pcornet_cdm_user}@${sid}/${pcornet_cdm}
 
 set echo on;
 set timing on;
