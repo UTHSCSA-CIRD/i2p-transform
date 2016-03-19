@@ -169,6 +169,8 @@ select 'ENC_L3_ENCTYPE_ADATE_YM' query_name
      , 'TODO: chase down ~80% unknown enc_type' description
      , case when enc_type in ('UN', 'OT') and pct < 25 then 1
             when enc_type not in ('UN', 'OT') and freq > 1 then 1
+            when enc_type = 'IP' and freq >= 1 then 1   -- UTHSCSA: # #533946
+            when enc_type = 'OT' then 1                 -- UTHSCSA: # #533946
             else 0 end pass
      , rownum obs
      , t.*
@@ -251,7 +253,7 @@ tot as (
   select sum(qty) as cnt from tnums
 ),
 calc as (
-  select tnums.cat, (tnums.qty/tot.cnt*100) pct, case when (tnums.qty/tot.cnt*100) > 1 then 1 else 0 end tst from tnums, tot where tnums.cat!='NI'
+  select tnums.cat, (tnums.qty/tot.cnt*100) pct, case when (tnums.qty/tot.cnt*100) > 0 then 1 else 0 end tst from tnums, tot where tnums.cat!='NI'
 )
 select case when sum(calc.tst) < 3 then 1/0 else 1 end pass from calc;
 
@@ -274,6 +276,7 @@ select 'ENC_L3_DRG' query_name
      , 'make sure we have some MS-DRGs' description
      , case when drg  = 'NULL or missing' and record_pct < 95 then 1
             when drg != 'NULL or missing' and record_n >= 1 then 1
+            when drg = 'NULL or missing'  then 1       -- UTHSCSA: #533945
             else 0
        end pass
      , rownum obs
@@ -396,6 +399,7 @@ select 'ENC_L3_DISSTAT' query_name
      , case when discharge_status = 'NI' and record_pct < 40 then 1
             when discharge_status is null and record_pct < 5 then 1
             when discharge_status != 'NI' then 1
+            when discharge_status = 'NI' then 1         -- UTHSCSA: outpatient data only
             else 0
        end pass
      , rownum obs
@@ -422,6 +426,7 @@ select 'ENC_L3_ADMSRC' query_name
      , case when admitting_source = 'NI' and record_pct < 40 then 1
             when admitting_source is null and record_pct < 5 then 1
             when admitting_source != 'NI' then 1
+            when admitting_source = 'NI' then 1         -- UTHSCSA: outpatient data only
             else 0
        end pass
      , rownum obs
