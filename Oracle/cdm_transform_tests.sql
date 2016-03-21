@@ -120,7 +120,7 @@ select case when count(*) > 0 then 1/0 else 1 end valid_pdx_flags from (
   );
 
 -- Make sure that there are several different enrollment dates
-select case when pct_distinct < 5 then 1/0 else 1 end many_enr_dates from (
+select case when pct_distinct < 1 then 1/0 else 1 end many_enr_dates from (
   with all_enrs as (
     select count(*) qty from enrollment
     ),
