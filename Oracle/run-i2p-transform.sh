@@ -15,10 +15,15 @@ set -e
 #export datamart_name=
 #export network_id=
 #export network_name=
+# export i2b2_etl_schema=
+# export min_pat_list_date_dd_mon_rrrr=
+# export min_visit_date_dd_mon_rrrr=
+# export enrollment_months_back=36
 
 # All i2b2 terms - used for local path mapping
 #export terms_table=
 
+python load_csv.py harvest_local harvest_local.csv harvest_local.ctl pcornet_cdm_user pcornet_cdm
 . ./load_pcornet_mapping.sh
 
 # Run some tests
@@ -28,6 +33,7 @@ connect ${pcornet_cdm_user}@${sid}/${pcornet_cdm}
 set echo on;
 
 define i2b2_data_schema=${i2b2_data_schema}
+define i2b2_etl_schema=${i2b2_etl_schema}
 
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
 
@@ -43,6 +49,9 @@ select providerid from "&&i2b2_data_schema".visit_dimension where 1=0;
 select case when qty = 0 then 1/0 else 1 end inout_cd_populated from (
   select count(*) qty from "&&i2b2_data_schema".visit_dimension where inout_cd is not null
   );
+
+-- Make sure the RXNorm mapping table exists
+select rxcui from "&&i2b2_etl_schema".clarity_med_id_to_rxcui@id where 1=0;
 
 EOF
 
@@ -77,11 +86,15 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE;
 
 define i2b2_data_schema=${i2b2_data_schema}
 define i2b2_meta_schema=${i2b2_meta_schema}
+define i2b2_etl_schema=${i2b2_etl_schema}
 define datamart_id=${datamart_id}
 define datamart_name=${datamart_name}
 define network_id=${network_id}
 define network_name=${network_name}
 define terms_table=${terms_table}
+define min_pat_list_date_dd_mon_rrrr=${min_pat_list_date_dd_mon_rrrr}
+define min_visit_date_dd_mon_rrrr=${min_visit_date_dd_mon_rrrr}
+define enrollment_months_back=${enrollment_months_back}
 
 -- Local terminology mapping
 start pcornet_mapping.sql

@@ -75,14 +75,14 @@ END;
 CREATE table i2b2patient_list as 
 select * from
 (
-select DISTINCT PATIENT_NUM from I2B2FACT where START_DATE > to_date('01-Jan-2010','dd-mon-rrrr')
+select DISTINCT PATIENT_NUM from I2B2FACT where START_DATE > to_date('&&min_pat_list_date_dd_mon_rrrr','dd-mon-rrrr')
 ) where ROWNUM<100000000
 /
 
 create or replace VIEW i2b2patient as select * from "&&i2b2_data_schema".PATIENT_DIMENSION where PATIENT_NUM in (select PATIENT_NUM from i2b2patient_list)
 /
 
-create or replace view i2b2visit as select * from "&&i2b2_data_schema".VISIT_DIMENSION where START_DATE >= to_date('01-Jan-2010','dd-mon-rrrr') and (END_DATE is NULL or END_DATE < CURRENT_DATE) and (START_DATE <CURRENT_DATE)
+create or replace view i2b2visit as select * from "&&i2b2_data_schema".VISIT_DIMENSION where START_DATE >= to_date('&&min_visit_date_dd_mon_rrrr','dd-mon-rrrr') and (END_DATE is NULL or END_DATE < CURRENT_DATE) and (START_DATE <CURRENT_DATE)
 /
 
 
@@ -133,14 +133,6 @@ For now, let's count all patients for testing with the KUMC test patients.
 
 --create or replace view i2b2loyalty_patients as (select patient_num,to_date('01-Jul-2010','dd-mon-rrrr') period_start,to_date('01-Jul-2014','dd-mon-rrrr') period_end from "&&i2b2_data_schema".loyalty_cohort_patient_summary where BITAND(filter_set, 61511) = 61511 and patient_num in (select patient_num from i2b2patient))
 --/
-
-create or replace view i2b2loyalty_patients as (
-  select 
-    patient_num, to_date('01-Jul-2010','dd-mon-rrrr') period_start,
-    to_date('01-Jul-2014','dd-mon-rrrr') period_end 
-  from "&&i2b2_data_schema".patient_dimension 
-  );
-
 
 BEGIN
 PMN_DROPSQL('DROP TABLE pcornet_codelist');
@@ -1215,7 +1207,7 @@ with pats_delta as (
   -- If only one visit, visit_delta_days will be 0
   select patient_num, max(start_date) - min(start_date) visit_delta_days
   from i2b2visit
-  where start_date > add_months(sysdate, -36)
+  where start_date > add_months(sysdate, -&&enrollment_months_back)
   group by patient_num
   ),
 enrolled as (
@@ -1398,8 +1390,22 @@ create or replace procedure PCORNetHarvest as
 begin
 
 INSERT INTO harvest(NETWORKID, NETWORK_NAME, DATAMARTID, DATAMART_NAME, DATAMART_PLATFORM, CDM_VERSION, DATAMART_CLAIMS, DATAMART_EHR, BIRTH_DATE_MGMT, ENR_START_DATE_MGMT, ENR_END_DATE_MGMT, ADMIT_DATE_MGMT, DISCHARGE_DATE_MGMT, PX_DATE_MGMT, RX_ORDER_DATE_MGMT, RX_START_DATE_MGMT, RX_END_DATE_MGMT, DISPENSE_DATE_MGMT, LAB_ORDER_DATE_MGMT, SPECIMEN_DATE_MGMT, RESULT_DATE_MGMT, MEASURE_DATE_MGMT, ONSET_DATE_MGMT, REPORT_DATE_MGMT, RESOLVE_DATE_MGMT, PRO_DATE_MGMT, REFRESH_DEMOGRAPHIC_DATE, REFRESH_ENROLLMENT_DATE, REFRESH_ENCOUNTER_DATE, REFRESH_DIAGNOSIS_DATE, REFRESH_PROCEDURES_DATE, REFRESH_VITAL_DATE, REFRESH_DISPENSING_DATE, REFRESH_LAB_RESULT_CM_DATE, REFRESH_CONDITION_DATE, REFRESH_PRO_CM_DATE, REFRESH_PRESCRIBING_DATE, REFRESH_PCORNET_TRIAL_DATE, REFRESH_DEATH_DATE, REFRESH_DEATH_CAUSE_DATE) 
-	VALUES('&&network_id', '&&network_name', getDataMartID(), getDataMartName(), getDataMartPlatform(), 3, 01, 02,03,03,03,03,03,03,'NI','NI','NI','NI','NI','NI','NI',03,'NI','NI','NI','NI',current_date,current_date,current_date,current_date,current_date,current_date,current_date,current_date,current_date,null,current_date,null,null,null);
-
+	select '&&network_id', '&&network_name', getDataMartID(), getDataMartName(), getDataMartPlatform(), 3, hl.DATAMART_CLAIMS, hl.DATAMART_EHR, hl.BIRTH_DATE_MGMT, hl.ENR_START_DATE_MGMT, hl.ENR_END_DATE_MGMT, hl.ADMIT_DATE_MGMT, hl.DISCHARGE_DATE_MGMT, hl.PX_DATE_MGMT, hl.RX_ORDER_DATE_MGMT, hl.RX_START_DATE_MGMT, hl.RX_END_DATE_MGMT, hl.DISPENSE_DATE_MGMT, hl.LAB_ORDER_DATE_MGMT, hl.SPECIMEN_DATE_MGMT, hl.RESULT_DATE_MGMT, hl.MEASURE_DATE_MGMT, hl.ONSET_DATE_MGMT, hl.REPORT_DATE_MGMT, hl.RESOLVE_DATE_MGMT, hl.PRO_DATE_MGMT,
+  case when (select count(*) from demographic) > 0 then current_date else null end REFRESH_DEMOGRAPHIC_DATE,
+  case when (select count(*) from enrollment) > 0 then current_date else null end REFRESH_ENROLLMENT_DATE,
+  case when (select count(*) from encounter) > 0 then current_date else null end REFRESH_ENCOUNTER_DATE,
+  case when (select count(*) from diagnosis) > 0 then current_date else null end REFRESH_DIAGNOSIS_DATE,
+  case when (select count(*) from procedures) > 0 then current_date else null end REFRESH_PROCEDURES_DATE,
+  case when (select count(*) from vital) > 0 then current_date else null end REFRESH_VITAL_DATE,
+  case when (select count(*) from dispensing) > 0 then current_date else null end REFRESH_DISPENSING_DATE,
+  case when (select count(*) from lab_result_cm) > 0 then current_date else null end REFRESH_LAB_RESULT_CM_DATE,
+  case when (select count(*) from condition) > 0 then current_date else null end REFRESH_CONDITION_DATE,
+  case when (select count(*) from pro_cm) > 0 then current_date else null end REFRESH_PRO_CM_DATE,
+  case when (select count(*) from prescribing) > 0 then current_date else null end REFRESH_PRESCRIBING_DATE,
+  case when (select count(*) from pcornet_trial) > 0 then current_date else null end REFRESH_PCORNET_TRIAL_DATE,
+  case when (select count(*) from death) > 0 then current_date else null end REFRESH_DEATH_DATE,
+  case when (select count(*) from death_cause) > 0 then current_date else null end REFRESH_DEATH_CAUSE_DATE
+  from harvest_local hl;
 
 end PCORNetHarvest;
 /
@@ -1411,8 +1417,6 @@ end PCORNetHarvest;
 At compile time, it's complaining about the fact tables don't exist that are 
 created in the function itself.  I created them ahead of time - SQL taken from
 the procedure.
-
-Also: Error(71,159): PL/SQL: ORA-00904: "MO"."PCORI_CUI": invalid identifier
 */
 whenever sqlerror continue;
 drop table basis;
@@ -1452,9 +1456,6 @@ create table supply(
 	concept_cd varchar2(50 byte)
   );
 
-alter table "&&i2b2_meta_schema".pcornet_med add (
-  pcori_cui varchar2(1000) -- arbitrary
-  );
 whenever sqlerror exit;
 
 create or replace procedure PCORNetPrescribing as
@@ -1528,7 +1529,8 @@ insert into prescribing (
 --    ,RAW_RXNORM_CUI
 )
 select distinct  m.patient_num, m.Encounter_Num,m.provider_id,  m.start_date order_date,  to_char(m.start_date,'HH:MI'), m.start_date start_date, m.end_date, mo.pcori_cui
-    ,quantity.nval_num quantity, refills.nval_num refills, supply.nval_num supply, freq.pcori_basecode frequency, basis.pcori_basecode basis
+    ,quantity.nval_num quantity, refills.nval_num refills, supply.nval_num supply, freq.pcori_basecode frequency, 
+    substr(basis.pcori_basecode, instr(basis.pcori_basecode, ':') + 1, 2) basis
  from i2b2fact m inner join pcornet_med mo on m.concept_cd = mo.c_basecode 
 inner join encounter enc on enc.encounterid = m.encounter_Num
 -- TODO: This join adds several minutes to the load - must be debugged
@@ -1553,7 +1555,8 @@ inner join encounter enc on enc.encounterid = m.encounter_Num
     on m.encounter_num = supply.encounter_num
     and m.concept_cd = supply.concept_Cd
 
-where (basis.c_fullname is null or basis.c_fullname= '\PCORI_MOD\RX_BASIS\PR\%'); -- jgk 11/2 bugfix: filter for PR, not DI
+where (basis.c_fullname is null or basis.c_fullname like '\PCORI_MOD\RX_BASIS\PR\%');
+
 
 end PCORNetPrescribing;
 /
