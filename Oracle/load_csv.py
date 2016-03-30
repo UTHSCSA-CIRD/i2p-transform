@@ -14,11 +14,16 @@ log = logging.getLogger(__name__)
 
 def main(argv, environ, open_argv, mk_tool):
     # TODO: Consider docopt
-    table_name, csv, ctl_out_fn, user_env, password_env = argv[1:6]
+    try:
+        table_name, csv, ctl_out_fn, user_env, password_env, sid_env = argv[1:7]
+        sid = environ[sid_env]
+    except:
+        table_name, csv, ctl_out_fn, user_env, password_env = argv[1:6]
+        sid = None
 
     table_tool = mk_tool(table_name=table_name,
                          user=environ[user_env],
-                         password=environ[password_env])
+                         password=environ[password_env], sid=sid)
 
     with open_argv(csv, 'rb') as fin:
         dr = DictReader(fin)
@@ -68,14 +73,17 @@ class TableTool(object):
         col2
         )
     '''
-    def __init__(self, Popen, user, password, table_name,
+    def __init__(self, Popen, user, password, table_name, sid=None,
                  sqlplus_cmd='sqlplus /nolog',
                  sqlldr_cmd='sqlldr'):
+
+        self.sid = sid
+
         def run(template):
             cmd = dedent(template.format(
                 sqlplus=sqlplus_cmd, sqlldr=sqlldr_cmd,
                 user=user, password=password,
-                table_name=table_name))
+                table_name=table_name, sid=sid))
             p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
             stdout, stderr = p.communicate()
             if stdout:
@@ -89,16 +97,21 @@ class TableTool(object):
         self.table_name = table_name
 
     @classmethod
-    def make(cls, Popen, user, password, name):
-        return TableTool(Popen, user, password, name)
+    def make(cls, Popen, user, password, name, sid=None):
+        return TableTool(Popen, user, password, name, sid)
 
     def create(self, dr):
         # Note: shell = true might not be the most secure, but it makes
         # piplining easier.
         # See also https://docs.python.org/2.7/library/subprocess.html#replacing-shell-pipeline  # noqa
         # Also, be warned that SQL injection is possible with arguments!
-        cmd = ("""{sqlplus} <<EOF
-        connect {user}/{password};
+        if self.sid:
+            cmd = """{sqlplus} <<EOF
+            connect {user}/{password}@{sid};"""
+        else: 
+            cmd = """{sqlplus} <<EOF
+            connect {user}/{password};"""
+        cmd += ("""
         set echo on;
         WHENEVER SQLERROR CONTINUE;
         drop table {table_name};
@@ -108,11 +121,19 @@ class TableTool(object):
         self.run(cmd)
 
     def load(self, ctl_fn, csv):
-        cmd = ('{sqlldr} {user}/{password} control=%(ctl_fn)s '
-               'data=%(csv)s log=%(log)s bad=%(bad)s '
-               'errors=0'
-               % dict(ctl_fn=ctl_fn, csv=csv,
-                      log=csv + '.log', bad=csv + '.bad'))
+
+        if self.sid:
+            cmd = ('{sqlldr} {user}/{password}@{sid} control=%(ctl_fn)s '
+                   'data=%(csv)s log=%(log)s bad=%(bad)s '
+                   'errors=0'
+                   % dict(ctl_fn=ctl_fn, csv=csv,
+                          log=csv + '.log', bad=csv + '.bad'))
+        else:
+            cmd = ('{sqlldr} {user}/{password} control=%(ctl_fn)s '
+                   'data=%(csv)s log=%(log)s bad=%(bad)s '
+                   'errors=0'
+                   % dict(ctl_fn=ctl_fn, csv=csv,
+                          log=csv + '.log', bad=csv + '.bad'))
         self.run(cmd)
 
     def ddl_from_csv(self, dr):
@@ -161,10 +182,10 @@ if __name__ == '__main__':
             with open(fn, mode) as f:
                 yield f
 
-        def mk_tool(table_name, user, password):
+        def mk_tool(table_name, user, password, sid=None):
             return TableTool.make(
                 MockPopen if '--dry-run' in argv else Popen,
-                user, password, table_name)
+                user, password, table_name, sid)
 
         main(argv=argv, environ=environ, open_argv=open_argv,
              mk_tool=mk_tool)
