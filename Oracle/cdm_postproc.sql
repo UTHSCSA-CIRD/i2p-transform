@@ -23,8 +23,10 @@ when matched then update set p.rx_providerid = e.providerid;
 /* Currently in HERON, we have hight in cm and weight in kg - the CDM wants
 height in inches and weight in pounds. */
 update vital v set v.ht = v.ht / 2.54;
---update vital v set v.wt = v.wt * 2.20462; -- convert from kg to lbs
-update vital v set v.wt = v.wt * 0.0625 -- UTHSCSA: convert from oz to lbs
+/* Convert from kg to lbs */
+--update vital v set v.wt = v.wt * 2.20462;
+/* Convert from oz to lbs */
+update vital v set v.wt = v.wt * 0.0625; 
 /* Populate death table.  Eventually, we expect this to be added to the upstream
 transform code.
 Ref: https://github.com/SCILHS/i2p-transform/issues/3
