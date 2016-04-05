@@ -1,8 +1,8 @@
 pcori_path,local_path
-\PCORI_MOD\RX_BASIS\PR\,\Medication\Inpatient\
-\PCORI_MOD\RX_BASIS\PR\,\Medication\Other Orders\
-\PCORI_MOD\RX_BASIS\PR\,\Medication\Outpatient\
-\PCORI_MOD\RX_BASIS\PR\,\Medication\PRN Inpatient Order\
+\PCORI_MOD\RX_BASIS\PR\OT\,\Medication\Inpatient\
+\PCORI_MOD\RX_BASIS\PR\OT\,\Medication\Other Orders\
+\PCORI_MOD\RX_BASIS\PR\OT\,\Medication\Outpatient\
+\PCORI_MOD\RX_BASIS\PR\OT\,\Medication\PRN Inpatient Order\
 \PCORI_MOD\RX_BASIS\PR\01\,\Medication\Dispensed\
 "\PCORI_MOD\RX_BASIS\PR\02\","\Medication\MAR Result\"
 "\PCORI_MOD\RX_BASIS\PR\02\","\Medication\MAR Result\Automatically Held\"
