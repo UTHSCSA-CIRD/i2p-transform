@@ -452,6 +452,7 @@ select 'ENC_L3_DISDISP' query_name
      , case when discharge_disposition = 'NI' and record_pct < 40 then 1
             when discharge_disposition is null and record_pct < 5 then 1
             when discharge_disposition != 'NI' then 1
+            when discharge_disposition = 'NI' then 1    -- UTHSCSA: outpatient data only
             else 0
        end pass
      , rownum obs

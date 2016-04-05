@@ -173,6 +173,7 @@ pcori_path,local_path
 \PCORI\VITAL\TOBACCO\02\03\,\i2b2\History\Social History\Tobacco Usage\Smokeless Tobacco Use\Former User\
 \PCORI\VITAL\TOBACCO\UN\06\,\i2b2\History\Social History\Tobacco Usage\Not Asked\
 \PCORI\ENCOUNTER\DISCHARGE_STATUS\NI\,\i2b2\Visit Details\Discharge Disposition Codes\0\
+\PCORI\ENCOUNTER\DISCHARGE_DISPOSITION\NI\,\i2b2\Visit Details\Discharge Disposition Codes\0\
 \PCORI\ENCOUNTER\DRG\02\,\i2b2\UHC\Diagnosis\UHC MS-DRG\
 \PCORI\ENCOUNTER\ADMITTING_SOURCE\AV\,\i2b2\UHC\Visit Details\Admission Point Of Origin\21\
 \PCORI\ENCOUNTER\ADMITTING_SOURCE\AV\,\i2b2\UHC\Visit Details\Admission Point Of Origin\2\
