@@ -113,7 +113,7 @@ pcori_path,local_path
 \PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Unmerge\
 \PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Contact Moved\
 \PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Wait List\
-\PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Appointment\
+\PCORI\ENCOUNTER\ENC_TYPE\AV\,\i2b2\Visit Details\Encounter Type\Appointment\
 \PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Consent Form\
 \PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\Letter (Out)\
 \PCORI\ENCOUNTER\ENC_TYPE\OT\,\i2b2\Visit Details\Encounter Type\BPA\
