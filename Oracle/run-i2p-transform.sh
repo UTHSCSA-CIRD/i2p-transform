@@ -24,6 +24,7 @@ set -e
 #export terms_table=
 
 python load_csv.py harvest_local harvest_local.csv harvest_local.ctl pcornet_cdm_user pcornet_cdm
+python load_csv.py PMN_LabNormal pmn_labnormal.csv pmn_labnormal.ctl pcornet_cdm_user pcornet_cdm
 . ./load_pcornet_mapping.sh
 
 # Run some tests
@@ -53,6 +54,11 @@ select case when qty = 0 then 1/0 else 1 end inout_cd_populated from (
 -- Make sure the RXNorm mapping table exists
 select rxcui from "&&i2b2_etl_schema".clarity_med_id_to_rxcui@id where 1=0;
 
+-- Make sure the observation fact medication table is populated
+select case when qty > 0 then 1 else 1/0 end obs_fact_meds_populated from (
+  select count(*) qty from observation_fact_meds
+  );
+
 EOF
 
 
@@ -62,10 +68,11 @@ connect ${pcornet_cdm_user}@${sid}/${pcornet_cdm}
 
 set echo on;
 set timing on;
+set linesize 3000;
+set pagesize 5000;
 
 WHENEVER SQLERROR CONTINUE;
 
-drop table PMN_LABNORMAL;
 drop table DEMOGRAPHIC;
 drop table ENROLLMENT;
 drop table ENCOUNTER;
@@ -95,6 +102,7 @@ define terms_table=${terms_table}
 define min_pat_list_date_dd_mon_rrrr=${min_pat_list_date_dd_mon_rrrr}
 define min_visit_date_dd_mon_rrrr=${min_visit_date_dd_mon_rrrr}
 define enrollment_months_back=${enrollment_months_back}
+define pcornet_cdm_user=${pcornet_cdm_user}
 
 -- Local terminology mapping
 start pcornet_mapping.sql
@@ -107,6 +115,9 @@ start PCORNetLoader_ora.sql
 
 -- Post-process steps
 start cdm_postproc.sql
+
+-- Report stats
+start cdm_stats.sql
 
 -- CDM transform tests
 start cdm_transform_tests.sql
