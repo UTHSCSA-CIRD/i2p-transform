@@ -358,6 +358,31 @@ set med.c_visualattributes = 'DAE' where c_fullname in (
   join "&&i2b2_meta_schema".PCORNET_MED med on med.c_fullname = pm.pcori_path
   where  med.c_fullname like '\PCORI_MOD\%'
   );
+  
+/* RX Frequency modifiers
+*/
+create or replace view rx_frequency_strs as
+select '\PCORI_MOD\RX_FREQUENCY\' freq_mod_path, 'RX_FREQUENCY:' freq_mod_pfx from dual;
+
+delete
+from "&&i2b2_meta_schema".PCORNET_MED pm
+where pm.c_fullname like (select strs.freq_mod_path || '%' from rx_frequency_strs strs);
+
+insert into "&&i2b2_meta_schema".pcornet_med
+select
+  c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, 
+  c_basecode, c_metadataxml, c_facttablecolumn, c_tablename, c_columnname, 
+  c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, m_applied_path, 
+  update_date, download_date, import_date, sourcesystem_cd, valuetype_cd, 
+  m_exclusion_cd, c_path, c_symbol, 
+  strs.freq_mod_pfx || substr(ht.c_fullname, length(strs.freq_mod_path) + 1, 2) pcori_basecode, 
+  null pcori_cui, null pcori_ndc
+from "&&i2b2_meta_schema"."&&terms_table" ht
+cross join rx_frequency_strs strs
+where ht.c_fullname like (select strs.freq_mod_path || '%' from rx_frequency_strs)
+and ht.m_exclusion_cd is null
+and ht.c_basecode is not null;
+  
 
 insert into "&&i2b2_meta_schema".PCORNET_MED
 with 
@@ -407,7 +432,7 @@ select
 delete 
 from "&&i2b2_meta_schema".PCORNET_MED where sourcesystem_cd='MAPPING';
 
--- Other diagnosis mappings such as modifiers for PDX, DX_SOURCE.
+
 insert into "&&i2b2_meta_schema".PCORNET_MED
 with med_mod_mapping as (
   select distinct pcori_path, i2b2.c_fullname, i2b2.c_basecode, i2b2.c_name
@@ -449,3 +474,55 @@ join "&&i2b2_meta_schema".pcornet_med on med_mod_mapping.PCORI_PATH = pcornet_me
 ;
 
 commit;
+
+/* Add relevent nodes from local i2b2 lab hierarchy to PCORNet Labs hierarchy.
+*/
+
+insert into "&&i2b2_meta_schema".pcornet_lab
+with lab_map as (
+	select distinct lab.c_hlevel, lab.c_path, lab.pcori_specimen_source, trim(CHR(13) from lab.pcori_basecode) as pcori_basecode
+  from "&&i2b2_meta_schema".pcornet_lab lab 
+  inner JOIN "&&i2b2_meta_schema".pcornet_lab ont_parent on lab.c_path=ont_parent.c_fullname
+  inner join pmn_labnormal norm on ont_parent.c_basecode=norm.LAB_NAME
+  where lab.c_fullname like '\PCORI\LAB_RESULT_CM\%'
+),
+local_loinc_terms as (
+  select lm.C_HLEVEL, lt.C_FULLNAME, lm.C_PATH, lm.PCORI_BASECODE, lm.pcori_specimen_source
+  from "&&i2b2_meta_schema"."&&terms_table" lt, lab_map lm
+  where lm.pcori_basecode=replace(lt.c_basecode, 'LOINC:', '')
+    and lt.c_fullname like '\i2b2\Laboratory Tests\%' and lt.c_basecode like 'LOINC:%'
+)
+select 
+  llt.C_HLEVEL,
+  concat(llt.c_path, substr(regexp_substr(lt.c_fullname, '\\[^\\]+\\$'), 2, length(regexp_substr(lt.c_fullname, '\\[^\\]+\\$')))) as c_fullname,
+  lt.C_NAME,
+  lt.C_SYNONYM_CD,
+  lt.C_VISUALATTRIBUTES,
+  lt.C_TOTALNUM,
+  lt.C_BASECODE,
+  lt.C_METADATAXML,
+  lt.C_FACTTABLECOLUMN,
+  lt.C_TABLENAME,
+  lt.C_COLUMNNAME,
+  lt.C_COLUMNDATATYPE,
+  lt.C_OPERATOR,
+  lt.C_DIMCODE,
+  lt.C_COMMENT,
+  lt.C_TOOLTIP,
+  lt.M_APPLIED_PATH,
+  lt.UPDATE_DATE,
+  lt.DOWNLOAD_DATE,
+  lt.IMPORT_DATE,
+  'MAPPING',
+  lt.VALUETYPE_CD,
+  lt.M_EXCLUSION_CD,
+  llt.C_PATH,
+  lt.C_SYMBOL,
+  llt.pcori_specimen_source,
+  llt.PCORI_BASECODE
+from "&&i2b2_meta_schema"."&&terms_table" lt, local_loinc_terms llt
+where lt.c_fullname like llt.c_fullname||'%\'
+;
+
+commit;
+

@@ -24,6 +24,74 @@ comment on column test_cases.record_pct is 'percent of all observations';
 comment on column test_cases.distinct_patid_n is 'patient count';
 comment on column test_cases.pass is '1 for pass, 0 for fail';
 
+/* Report how many condition table rows were rejected.
+*/
+insert into test_cases (query_name, description, pass, obs, record_n, record_pct)
+with err as (
+  select count(*) qty from pcornet_cdm.ERR$_CONDITION
+  ),
+total_condition as (
+  select count(*) qty from pcornet_cdm.condition
+  )
+select 'rejected_condition_rows' query_name
+     , 'Report how many rows were rejected from the condition table due to table constraints.' description
+     , case when err.qty < 1000 then 1 else 0 end pass
+     , rownum obs
+     , err.qty record_n
+     , (err.qty / tc.qty) * 100 record_pct
+from total_condition tc cross join err
+;
+
+/* Test that we have some height/weight measurements
+*/
+insert into test_cases (query_name, description, pass, obs, record_n, record_pct)
+with total_vital as (
+  select count(*) qty from pcornet_cdm.vital
+  ),
+ht as (
+  select count(*) qty from pcornet_cdm.vital
+  where ht is not null
+  ),
+wt as (
+  select count(*) qty from pcornet_cdm.vital
+  where wt is not null
+  ),
+bmi as (
+  select count(*) qty from pcornet_cdm.vital
+  where original_bmi is not null
+  ),
+results as (
+  select 
+    round((ht.qty/total_vital.qty) * 100) pct_ht,
+    round((wt.qty/total_vital.qty) * 100) pct_wt,
+    round((bmi.qty/total_vital.qty) * 100) pct_bmi
+  from total_vital cross join ht cross join wt cross join bmi
+  )
+select 'some_height_measurements_4335' query_name
+     , 'Make sure we have at least some height records' description
+     , case when ht.qty > 0 then 1 else 0 end pass
+     , rownum obs
+     , ht.qty record_n
+     , results.pct_ht record_pct
+from total_vital cross join ht cross join results
+union all
+select 'some_weight_measurements_4335' query_name
+     , 'Make sure we have at least some weight records' description
+     , case when wt.qty > 0 then 1 else 0 end pass
+     , rownum obs
+     , wt.qty record_n
+     , results.pct_wt record_pct
+from total_vital cross join wt cross join results
+union all
+select 'some_bmi_measurements_4335' query_name
+     , 'Make sure we have at least some bmi records' description
+     , case when bmi.qty > 0 then 1 else 0 end pass
+     , rownum obs
+     , bmi.qty record_n
+     , results.pct_bmi record_pct
+from total_vital cross join bmi cross join results
+;
+commit;
 
 /* Test to make sure we got about the same number of patients in the CDM 
 diagnoses that we do in i2b2.
@@ -535,6 +603,38 @@ where enc_type in ('IP', 'IS')
 order by 2
 ;
 */
+
+
+/*  Verify that LAB_RESULT_CM contains data associated with a least half of the 
+labs defined in PMN_LABLOCAL.
+*/
+insert into test_cases (query_name, description, obs, by_value1, by_value2, record_pct, pass)
+with partial_lab_counts as (
+  select lab_name, count(lab_name) lab_count
+  from lab_result_cm
+  group by lab_name
+), complete_lab_counts as(
+  select replace(pmn.lab_name, 'LAB_NAME:', '') lab_name,
+    case when lc.lab_count is null then 0 else lc.lab_count end lab_count
+  from pmn_labnormal pmn
+  left outer join partial_lab_counts lc on concat('LAB_NAME:', lc.lab_name) = pmn.lab_name
+), total_lab_types as (
+  select count(*) num_labs from complete_lab_counts
+), present_lab_types as (
+  select count(*) num_labs from complete_lab_counts
+  where lab_count > 0
+)
+select
+'LAB_RESULT_CM Test' query_name,
+'LAB_RESULT_CM contains data associated with at least half of the defined labs' description,
+rownum obs,
+plt.num_labs by_value1,
+tlt.num_labs by_values2,
+round(plt.num_labs/tlt.num_labs, 4) record_pct,
+case when (plt.num_labs/tlt.num_labs) > 0.5 then 1 else 0 end pass
+from present_lab_types plt
+cross join total_lab_types tlt
+;
 
 select case when count(*) > 0 then 1/0 else 1 end all_test_cases_pass from (
 select * from test_cases where pass = 0
