@@ -35,6 +35,21 @@ alter session set NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI';
 
 TODO: push this back into HERON ETL
 */
+
+--TODO: Consider trying to share this function with PCORNetLoad_ora.sql
+create or replace PROCEDURE GATHER_TABLE_STATS(table_name VARCHAR2) AS 
+  BEGIN
+  DBMS_STATS.GATHER_TABLE_STATS (
+          ownname => 'PCORNET_CDM', -- This doesn't work as a parameter for some reason.
+          tabname => table_name,
+          estimate_percent => 50, -- Percentage picked somewhat arbitrarily
+          cascade => TRUE,
+          degree => 16 
+          );
+END GATHER_TABLE_STATS;
+/
+
+
 merge into "&&i2b2_data_schema".visit_dimension vd
 using (
   -- can we get it from UHC length_of_stay?
@@ -113,6 +128,7 @@ drop table enc_type;
 whenever sqlerror exit;
 
 /* explore encounter mapping: where do our encounters come from? */
+/*
 select count(*), count(distinct encounter_num), encounter_ide_source
 from "&&i2b2_data_schema".encounter_mapping
 group by encounter_ide_source
@@ -124,7 +140,7 @@ from "&&i2b2_data_schema".encounter_mapping
 group by encounter_ide_source
 order by 1
 ;
-
+*/
 
 merge into "&&i2b2_data_schema".visit_dimension vd
 using (
@@ -138,13 +154,35 @@ using (
   join "&&i2b2_data_schema".concept_dimension cd on cd.concept_path like pm.local_path || '%'
   where pm.pcori_path like '\PCORI\ENCOUNTER\ENC_TYPE\%'
   )
--- Note: our patient-day style encounters etc. may result in
--- multiple encounter types for a single encounter.
-select obs.encounter_num, max(et.pcori_code) pcori_code
-from "&&i2b2_data_schema".observation_fact obs
-join enc_type_codes et on et.concept_cd = obs.concept_cd
-group by obs.encounter_num
-) et on ( vd.encounter_num = et.encounter_num )
+  /* Note: our patient-day style encounters etc. may result in
+     multiple encounter types for a single encounter.
+     Therefore we need to pivot to all the encounter types associated with each
+     encounter and then choose (intentionally and deterministically) the
+     single encounter type that will prevail for each encounter
+   */
+ , obs_enc_type_pivot as (
+   select * 
+   from (select obs.encounter_num, et.pcori_code 
+         from "&&i2b2_data_schema".observation_fact obs
+   join enc_type_codes et on et.concept_cd = obs.concept_cd)
+   pivot
+   (
+    max(pcori_code)
+    for pcori_code in ('EI' as ei, 'IP' as ip, 'ED' as ed, 'IS' as e_is 
+                     , 'AV' as av, 'OA' as oa, 'OT' as ot
+                     , 'NI' as ni, 'UN' as un)
+   )
+  )
+  /* Single Encounter type to Encounter coercion:
+     IP + ED = EI
+     EI > IP || ED > IS > AV > OA > OT > NI > UN
+   */
+  select encounter_num,
+         case when ip is not null and ed is not null then 'EI'
+              else coalesce(ei, ip, ed, e_is, av, oa, ot, ni, un, 'UN')
+         end as pcori_code
+  from obs_enc_type_pivot) et 
+on ( vd.encounter_num = et.encounter_num )
 when matched then update
 set inout_cd = et.pcori_code;
 -- 11,085,911 rows merged.
@@ -205,6 +243,10 @@ join ranks on pr.encounter_num = ranks.encounter_num and pr.pc_rank = ranks.pc_r
 ;
 
 create index discharge_disp_encnum_idx on discharge_disp(encounter_num);
+begin
+GATHER_TABLE_STATS('discharge_disp');
+end;
+/
 
 update "&&i2b2_data_schema".visit_dimension vd
 set discharge_disposition = coalesce((
@@ -238,6 +280,12 @@ select obs.encounter_num, et.pcori_code
 from "&&i2b2_data_schema".observation_fact obs
 join enc_status_codes et on et.concept_cd = obs.concept_cd;
 
+create index enc_status_facts_encnum_idx on enc_status_facts(encounter_num);
+begin
+GATHER_TABLE_STATS('enc_status_facts');
+end;
+/
+
 create table discharge_status as
 with
 ranks as (
@@ -262,6 +310,10 @@ join ranks on pr.encounter_num = ranks.encounter_num and pr.pc_rank = ranks.pc_r
 ;
 
 create index discharge_status_encnum_idx on discharge_status(encounter_num);
+begin
+GATHER_TABLE_STATS('discharge_status');
+end;
+/
 
 update "&&i2b2_data_schema".visit_dimension vd
 set discharge_status = coalesce((
@@ -277,41 +329,52 @@ whenever sqlerror continue;
 alter table "&&i2b2_data_schema".visit_dimension add (
   admitting_source  VARCHAR2(4 BYTE)
   );
+drop table admit_source_enc_code_rank;
+drop table admit_source_priority_rank;
 whenever sqlerror exit;
 
+create table admit_source_enc_code_rank as
+with codes as (
+  select 
+    pm.pcori_path, cd.concept_cd, cd.name_char, 
+    replace(pe.pcori_basecode, 'ADMITTING_SOURCE:', '') pcori_code 
+  from 
+    pcornet_mapping pm 
+  join blueherondata.concept_dimension cd on cd.concept_path like pm.local_path || '%'
+  join blueheronmetadata.pcornet_enc pe on pe.c_fullname = pm.pcori_path
+  where pm.pcori_path like '\PCORI\ENCOUNTER\ADMITTING_SOURCE\%'
+  )
+select 
+  obs.encounter_num, codes.pcori_code,
+  -- Prioritize status: Last OT, UN, NI
+  decode(codes.pcori_code, 'AF',0,'AL',1,'AV',2,'ED',3,'HH',4,'HO',5,'HS',6,'IP',7,
+                           'NH',8,'RH',9,'RS',10,'SN',11,'OT',12,'UN',13,'NI',14, 99) as_rank 
+from blueherondata.observation_fact obs
+join codes on codes.concept_cd = obs.concept_cd;
+
+create index admit_source_enc_rank_idx on admit_source_enc_code_rank(encounter_num, as_rank);
+begin
+GATHER_TABLE_STATS('admit_source_enc_code_rank');
+end;
+/
+
+create table admit_source_priority_rank as 
+select min(as_rank) as_rank, encounter_num 
+from admit_source_enc_code_rank ranks
+group by encounter_num;
+
+create index admit_source_pr_enc_rank_idx on admit_source_priority_rank(encounter_num, as_rank);
+begin
+GATHER_TABLE_STATS('admit_source_priority_rank');
+end;
+/
+
 merge into "&&i2b2_data_schema".visit_dimension vd using (
-  with codes as (
-    select 
-      pm.pcori_path, cd.concept_cd, cd.name_char, 
-      replace(pe.pcori_basecode, 'ADMITTING_SOURCE:', '') pcori_code 
-    from 
-      pcornet_mapping pm 
-    join "&&i2b2_data_schema".concept_dimension cd on cd.concept_path like pm.local_path || '%'
-    join "&&i2b2_meta_schema".pcornet_enc pe on pe.c_fullname = pm.pcori_path
-    where pm.pcori_path like '\PCORI\ENCOUNTER\ADMITTING_SOURCE\%'
-    ),
-  enc_as as (
-    select obs.encounter_num, codes.pcori_code
-    from "&&i2b2_data_schema".observation_fact obs
-    join codes on codes.concept_cd = obs.concept_cd
-    ),
-  ranks as (
-    select 
-      encounter_num, pcori_code,
-      -- Prioritize status: Last OT, UN, NI
-      decode(pcori_code, 'AF',0,'AL',1,'AV',2,'ED',3,'HH',4,'HO',5,'HS',6,'IP',7,
-                         'NH',8,'RH',9,'RS',10,'SN',11,'OT',12,'UN',13,'NI',14, 99) as_rank 
-      from enc_as
-    ),
-  priority_rank as (
-    select min(as_rank) as_rank, encounter_num 
-    from ranks
-    group by encounter_num
-    ) 
   select distinct
     ranks.encounter_num, coalesce(ranks.pcori_code, 'NI') pcori_code 
-  from priority_rank pr
-  join ranks on pr.encounter_num = ranks.encounter_num and pr.as_rank = ranks.as_rank
+  from admit_source_priority_rank pr
+  join admit_source_enc_code_rank ranks on pr.encounter_num = ranks.encounter_num 
+    and pr.as_rank = ranks.as_rank
   ) admt_enc on (admt_enc.encounter_num = vd.encounter_num)
 when matched then update
 set vd.admitting_source = admt_enc.pcori_code
