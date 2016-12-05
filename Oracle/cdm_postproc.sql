@@ -20,8 +20,8 @@ using encounter e
    on (p.encounterid = e.encounterid)
 when matched then update set p.rx_providerid = e.providerid;
 
-/* Currently in HERON, we have hight in cm and weight in kg - the CDM wants
-height in inches and weight in pounds. */
+/* Currently in HERON, we have hight in cm and weight in oz (from visit vitals).
+The CDM wants height in inches and weight in pounds. */
 update vital v set v.ht = v.ht / 2.54;
 --update vital v set v.wt = v.wt * 2.20462; -- convert from kg to lbs
 update vital v set v.wt = v.wt * 0.0625 -- UTHSCSA: convert from oz to lbs
