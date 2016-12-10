@@ -20,10 +20,11 @@
 --undef network_id;
 --undef network_name;
 
+--/
 create or replace PROCEDURE GATHER_TABLE_STATS(table_name VARCHAR2) AS 
   BEGIN
   DBMS_STATS.GATHER_TABLE_STATS (
-          ownname => 'PCORNET_CDM', -- This doesn't work as a parameter for some reason.
+          ownname => 'PCORI_CDM', -- This doesn't work as a parameter for some reason.
           tabname => table_name,
           estimate_percent => 50, -- Percentage picked somewhat arbitrarily
           cascade => TRUE,
@@ -32,6 +33,7 @@ create or replace PROCEDURE GATHER_TABLE_STATS(table_name VARCHAR2) AS
 END GATHER_TABLE_STATS;
 /
 
+--/
 create or replace PROCEDURE PMN_DROPSQL(sqlstring VARCHAR2) AS 
   BEGIN
       EXECUTE IMMEDIATE sqlstring;
@@ -40,6 +42,7 @@ create or replace PROCEDURE PMN_DROPSQL(sqlstring VARCHAR2) AS
 END PMN_DROPSQL;
 /
 
+--/
 create or replace FUNCTION PMN_IFEXISTS(objnamestr VARCHAR2, objtypestr VARCHAR2) RETURN BOOLEAN AS 
 cnt NUMBER;
 BEGIN
@@ -62,6 +65,7 @@ END PMN_IFEXISTS;
 /
 
 
+--/
 create or replace PROCEDURE PMN_Execuatesql(sqlstring VARCHAR2) AS 
 BEGIN
   EXECUTE IMMEDIATE sqlstring;
@@ -70,6 +74,7 @@ END PMN_ExecuateSQL;
 /
 
 --ACK: http://dba.stackexchange.com/questions/9441/how-to-catch-and-handle-only-specific-oracle-exceptions
+--/
 create or replace procedure create_error_table(table_name varchar2) as
 sqltext varchar2(4000); 
 
@@ -91,66 +96,105 @@ end;
 
 
 
-
-
+--create or replace synonym I2B2FACT for blueherondata.OBSERVATION_FACT2;
 CREATE OR REPLACE SYNONYM I2B2FACT FOR "&&i2b2_data_schema".OBSERVATION_FACT
 /
-
 CREATE OR REPLACE SYNONYM I2B2MEDFACT FOR OBSERVATION_FACT_MEDS
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE i2b2patient_list');
 END;
 /
 
+select * from
+(
+select DISTINCT PATIENT_NUM from I2B2FACT 
+where START_DATE > to_date('01-Jan-2010','dd-mon-rrrr')
+) where ROWNUM<100000000
+;
+--/
 CREATE table i2b2patient_list as 
 select * from
 (
-select DISTINCT PATIENT_NUM from I2B2FACT where START_DATE > to_date('&&min_pat_list_date_dd_mon_rrrr','dd-mon-rrrr')
+--select DISTINCT PATIENT_NUM from I2B2FACT where START_DATE > to_date('&&min_pat_list_date_dd_mon_rrrr','dd-mon-rrrr')
+select DISTINCT PATIENT_NUM from 
+blueherondata.visit_dimension
+where START_DATE > to_date('01-Jan-2010','dd-mon-rrrr')
 ) where ROWNUM<100000000
 /
 
-create or replace VIEW i2b2patient as select * from "&&i2b2_data_schema".PATIENT_DIMENSION where PATIENT_NUM in (select PATIENT_NUM from i2b2patient_list)
+create unique index i2b2pat_list_pn 
+on i2b2patient_list(patient_num);
+analyze INDEX I2B2PAT_LIST_PN
+compute statistics;
+
+/* The below were one-off rebuilds/creates that are not part of our i2p */
+-- CREATE INDEX BLUEHERONDATA.VISIT_PN_SD_ED
+-- ALTER INDEX "BLUEHERONDATA"."VISITDIM_EN_PN_LP_IO_SD_IDX" rebuild;
+-- ALTER INDEX "BLUEHERONDATA"."VISITDIM_STD_EDD_IDX" rebuild;
+-- select * from "&&i2b2_data_schema".PATIENT_DIMENSION 
+
+;
+grant select on BLUEHERONDATA.PATIENT_DIMENSION to pcori_cdm;
+
+create or replace VIEW pcori_cdm.i2b2patient as 
+select * from BLUEHERONDATA.PATIENT_DIMENSION 
+where PATIENT_NUM in (select PATIENT_NUM from i2b2patient_list)
+;
 /
 
-create or replace view i2b2visit as select * from "&&i2b2_data_schema".VISIT_DIMENSION where START_DATE >= to_date('&&min_visit_date_dd_mon_rrrr','dd-mon-rrrr') and (END_DATE is NULL or END_DATE < CURRENT_DATE) and (START_DATE <CURRENT_DATE)
+grant select on BLUEHERONDATA.VISIT_DIMENSION to pcori_cdm;
+
+create or replace view i2b2visit as 
+--select * from "&&i2b2_data_schema".VISIT_DIMENSION 
+select * from blueherondata.visit_dimension
+--where START_DATE >= to_date('&&min_visit_date_dd_mon_rrrr','dd-mon-rrrr') 
+where START_DATE >= to_date('01-Jan-2010','dd-mon-rrrr') 
+and (END_DATE is NULL or END_DATE < CURRENT_DATE) 
+and (START_DATE <CURRENT_DATE)
 /
 
 
-CREATE OR REPLACE SYNONYM pcornet_med FOR  "&&i2b2_meta_schema".pcornet_med
+CREATE OR REPLACE SYNONYM pcornet_med FOR  blueheronmetadata.pcornet_med
 /
 
-CREATE OR REPLACE SYNONYM pcornet_lab FOR  "&&i2b2_meta_schema".pcornet_lab
+CREATE OR REPLACE SYNONYM pcornet_lab FOR  "BLUEHERONMETADATA".pcornet_lab;
 /
 
-CREATE OR REPLACE SYNONYM pcornet_diag FOR  "&&i2b2_meta_schema".pcornet_diag
+CREATE OR REPLACE SYNONYM pcornet_diag FOR  "BLUEHERONMETADATA".pcornet_diag
 /
 
-CREATE OR REPLACE SYNONYM pcornet_demo FOR  "&&i2b2_meta_schema".pcornet_demo
+CREATE OR REPLACE SYNONYM pcornet_demo FOR  "BLUEHERONMETADATA".pcornet_demo
 /
 
-CREATE OR REPLACE SYNONYM pcornet_proc FOR  "&&i2b2_meta_schema".pcornet_proc
+CREATE OR REPLACE SYNONYM pcornet_proc FOR  "BLUEHERONMETADATA".pcornet_proc
 /
 
-CREATE OR REPLACE SYNONYM pcornet_vital FOR  "&&i2b2_meta_schema".pcornet_vital
+CREATE OR REPLACE SYNONYM pcornet_vital FOR  "BLUEHERONMETADATA".pcornet_vital
 /
 
-CREATE OR REPLACE SYNONYM pcornet_enc FOR  "&&i2b2_meta_schema".pcornet_enc
+CREATE OR REPLACE SYNONYM pcornet_enc FOR  "BLUEHERONMETADATA".pcornet_enc
 /
 
+--/
 create or replace FUNCTION GETDATAMARTID RETURN VARCHAR2 IS 
 BEGIN 
-    RETURN '&&datamart_id';
+--    RETURN '&&datamart_id';
+      RETURN 'C4UTHSCSA';
 END;
 /
 
+--/
 CREATE OR REPLACE FUNCTION GETDATAMARTNAME RETURN VARCHAR2 AS 
 BEGIN 
-    RETURN '&&datamart_name';
+    --RETURN '&&datamart_name';
+    RETURN 'UT HSC San Antonio';
 END;
 /
 
+--/
 CREATE OR REPLACE FUNCTION GETDATAMARTPLATFORM RETURN VARCHAR2 AS 
 BEGIN 
     RETURN '02'; -- 01 is MSSQL, 02 is Oracle
@@ -173,6 +217,8 @@ END;
 
 create table pcornet_codelist(codetype varchar2(20), code varchar2(50))
 /
+
+--/
 create or replace procedure pcornet_parsecode (codetype in varchar, codestring in varchar) as
 
 tex varchar(2000);
@@ -213,7 +259,7 @@ end pcornet_parsecode;
 /
 
 
-
+--/
 create or replace procedure pcornet_popcodelist as
 
 codedata varchar(2000);
@@ -242,12 +288,13 @@ end pcornet_popcodelist;
 
 
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE enrollment');
 END;
 /
 
+--/
 CREATE TABLE enrollment (
 	PATID varchar(50) NOT NULL,
 	ENR_START_DATE date NOT NULL,
@@ -260,12 +307,13 @@ CREATE TABLE enrollment (
 /
 
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE vital');
 END;
 /
 
+--/
 CREATE TABLE vital (
 	VITALID varchar(19)  primary key,
 	PATID varchar(50) NULL,
@@ -294,14 +342,17 @@ CREATE TABLE vital (
 )
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP SEQUENCE vital_seq');
 END;
 /
 
+--/
 create sequence  vital_seq
 /
 
+--/
 create or replace trigger vital_trg
 before insert on vital
 for each row
@@ -311,11 +362,13 @@ end;
 /
 
 
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE procedures');
 END;
 /
 
+--/
 CREATE TABLE procedures(
 	PROCEDURESID varchar(19)  primary key,
 	PATID varchar(50) NOT NULL,
@@ -332,6 +385,7 @@ CREATE TABLE procedures(
 )
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP sequence  procedures_seq');
 END;
@@ -340,6 +394,7 @@ END;
 create sequence  procedures_seq
 /
 
+--/
 create or replace trigger procedures_trg
 before insert on procedures
 for each row
@@ -348,11 +403,13 @@ begin
 end;
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE diagnosis');
 END;
 /
 
+--/
 CREATE TABLE diagnosis(
 	DIAGNOSISID varchar(19)  primary key,
 	PATID varchar(50) NOT NULL,
@@ -372,13 +429,14 @@ CREATE TABLE diagnosis(
 )
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP sequence  diagnosis_seq');
 END;
 /
 create sequence  diagnosis_seq
 /
-
+--/
 create or replace trigger diagnosis_trg
 before insert on diagnosis
 for each row
@@ -389,12 +447,12 @@ end;
 
 
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE lab_result_cm');
 END;
 /
-
+--/
 CREATE TABLE lab_result_cm(
 	LAB_RESULT_CM_ID varchar(19)  primary key,
 	PATID varchar(50) NOT NULL,
@@ -430,7 +488,7 @@ CREATE TABLE lab_result_cm(
 )
 /
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP SEQUENCE lab_result_cm_seq');
 END;
@@ -439,6 +497,7 @@ END;
 create sequence  lab_result_cm_seq
 /
 
+--/
 create or replace trigger lab_result_cm_trg
 before insert on lab_result_cm
 for each row
@@ -446,7 +505,7 @@ begin
   select lab_result_cm_seq.nextval into :new.LAB_RESULT_CM_ID from dual;
 end;
 /
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE PMN_LabNormal');
 END;
@@ -461,53 +520,39 @@ CREATE TABLE PMN_LabNormal  (
 /
 
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:LDL', '0', 'GE', '165', 'LE')
-/
+  VALUES('LAB_NAME:LDL', '0', 'GE', '165', 'LE');
+INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
+  VALUES('LAB_NAME:A1C', '', 'NI', '', 'NI');
+INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
+  VALUES('LAB_NAME:CK', '50', 'GE', '236', 'LE');
+INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
+  VALUES('LAB_NAME:CK_MB', '', 'NI', '', 'NI');
+INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
+  VALUES('LAB_NAME:CK_MBI', '', 'NI', '', 'NI');
+INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
+  VALUES('LAB_NAME:CREATININE', '0', 'GE', '1.6', 'LE');
+
 
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:A1C', '', 'NI', '', 'NI')
-/
-
+  VALUES('LAB_NAME:CREATININE', '0', 'GE', '1.6', 'LE');
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:CK', '50', 'GE', '236', 'LE')
-/
-
+  VALUES('LAB_NAME:HGB', '12', 'GE', '17.5', 'LE');
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:CK_MB', '', 'NI', '', 'NI')
-/
-
-INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:CK_MBI', '', 'NI', '', 'NI')
-/
-
-INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:CREATININE', '0', 'GE', '1.6', 'LE')
-/
-
-INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:CREATININE', '0', 'GE', '1.6', 'LE')
-/
-
-INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:HGB', '12', 'GE', '17.5', 'LE')
-/
-
-INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
-  VALUES('LAB_NAME:INR', '0.8', 'GE', '1.3', 'LE')
-/
+  VALUES('LAB_NAME:INR', '0.8', 'GE', '1.3', 'LE');
+;
 
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
   VALUES('LAB_NAME:TROP_I', '0', 'GE', '0.49', 'LE')
-/
+;
 
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
   VALUES('LAB_NAME:TROP_T_QL', '', 'NI', '', 'NI')
-/
+;
 
 INSERT INTO PMN_LabNormal(LAB_NAME, NORM_RANGE_LOW, NORM_MODIFIER_LOW, NORM_RANGE_HIGH, NORM_MODIFIER_HIGH)
   VALUES('LAB_NAME:TROP_T_QN', '0', 'GE', '0.09', 'LE')
-/
-
+;
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE death');
 END;
@@ -521,6 +566,7 @@ CREATE TABLE death(
 )
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE death_cause');
 END;
@@ -535,6 +581,7 @@ CREATE TABLE death_cause(
 )
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE dispensing');
 END;
@@ -551,14 +598,14 @@ CREATE TABLE dispensing(
 )
 /
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP sequence  dispensing_seq');
 END;
 /
 create sequence  dispensing_seq
 /
-
+--/
 create or replace trigger dispensing_trg
 before insert on dispensing
 for each row
@@ -575,7 +622,7 @@ end;
 
 
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE prescribing');
 END;
@@ -601,14 +648,14 @@ CREATE TABLE prescribing(
 )
 /
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP sequence  prescribing_seq');
 END;
 /
 create sequence  prescribing_seq
 /
-
+--/
 create or replace trigger prescribing_trg
 before insert on prescribing
 for each row
@@ -616,7 +663,7 @@ begin
   select prescribing_seq.nextval into :new.PRESCRIBINGID from dual;
 end;
 /
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE pcornet_trial');
 END;
@@ -632,7 +679,7 @@ CREATE TABLE pcornet_trial(
 	TRIAL_INVITE_CODE varchar(20) NULL
 )
 /
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE condition');
 END;
@@ -654,14 +701,14 @@ CREATE TABLE condition(
 	RAW_CONDITION_SOURCE varchar(2) NULL
 )
 /
-
+--/
 BEGIN
 PMN_DROPSQL('DROP sequence  condition_seq');
 END;
 /
 create sequence  condition_seq
 /
-
+--/
 create or replace trigger condition_trg
 before insert on condition
 for each row
@@ -671,7 +718,7 @@ end;
 /
 
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE pro_cm');
 END;
@@ -693,13 +740,14 @@ CREATE TABLE pro_cm(
 )
 /
 
+--/
 BEGIN
 PMN_DROPSQL('DROP sequence  pro_cm_seq');
 END;
 /
 create sequence  pro_cm_seq
 /
-
+--/
 create or replace trigger pro_cm_trg
 before insert on pro_cm
 for each row
@@ -707,7 +755,7 @@ begin
   select pro_cm_seq.nextval into :new.PRO_CM_ID from dual;
 end;
 /
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE harvest');
 END;
@@ -757,7 +805,7 @@ CREATE TABLE harvest(
 /
 
 
-
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE encounter');
 END;
@@ -787,6 +835,7 @@ CREATE TABLE encounter(
 )
 /
 
+/*
 BEGIN
 PMN_DROPSQL('DROP TABLE demographic');
 END;
@@ -804,7 +853,9 @@ CREATE TABLE demographic(
 	RAW_RACE varchar(50) NULL
 )
 /
+*/
 
+--/
 BEGIN
 PMN_DROPSQL('DROP TABLE i2pReport');
 END;
@@ -812,7 +863,7 @@ END;
 
 create table i2pReport (runid number, rundate date, concept varchar(20), sourceval number, destval number, diff number)
 /
-
+--/
 BEGIN
 insert into i2preport (runid) values (0);
 pcornet_popcodelist;
@@ -820,7 +871,7 @@ END;
 /
 
 
-create or replace procedure PCORNetDemographic as 
+/*create or replace procedure PCORNetDemographic as 
 
 sqltext varchar2(4000); 
 cursor getsql is 
@@ -973,7 +1024,7 @@ GATHER_TABLE_STATS('DEMOGRAPHIC');
 
 end PCORNetDemographic; 
 /
-
+*/
 
 
 /* TODOs: 
@@ -983,12 +1034,12 @@ ORA-00904: "FACILITY_ID": invalid identifier
 5)
 ORA-00904: "LOCATION_ZIP": invalid identifier
 */
-create or replace procedure PCORNetEncounter as
+/*create or replace procedure PCORNetEncounter as
 
 sqltext varchar2(4000);
 begin
-
-PMN_DROPSQL('drop index encounter_patid');
+*/
+/*PMN_DROPSQL('drop index encounter_patid');
 PMN_DROPSQL('drop index encounter_encounterid');
 
 insert into encounter(PATID,ENCOUNTERID,admit_date ,ADMIT_TIME , 
@@ -1001,9 +1052,9 @@ select distinct v.patient_num, v.encounter_num,
 	end_Date, 
 	to_char(end_Date,'HH:MI'), 
 	providerid,
-  null location_zip, /* See TODO above */
+  null location_zip, *//* See TODO above *//*
 (case when pcori_enctype is not null then pcori_enctype else 'UN' end) enc_type, 
-  null facility_id,  /* See TODO above */
+  null facility_id,  *//* See TODO above *//*
   CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE  discharge_disposition END, 
   CASE WHEN pcori_enctype='AV' THEN 'NI' ELSE discharge_status END, 
   drg.drg, drg_type, 
@@ -1031,10 +1082,10 @@ GATHER_TABLE_STATS('ENCOUNTER');
 
 end PCORNetEncounter;
 /
+*/
 
 
-
-
+--/
 create or replace procedure PCORNetDiagnosis as
 sqltext varchar2(4000);
 begin
@@ -1106,7 +1157,7 @@ end PCORNetDiagnosis;
 
 
 
-
+--/
 create or replace procedure PCORNetCondition as
 sqltext varchar2(4000);
 begin
@@ -1159,7 +1210,7 @@ end PCORNetCondition;
 
 
 
-
+--/
 create or replace procedure PCORNetProcedure as
 begin
 
@@ -1189,7 +1240,7 @@ end PCORNetProcedure;
 
 
 
-
+--/
 create or replace procedure PCORNetVital as
 begin
 
@@ -1278,9 +1329,8 @@ end PCORNetVital;
 
 
 
-
-
-
+  /* If only one visit, visit_delta_days will be 0 */
+--/
 create or replace procedure PCORNetEnroll as
 begin
 
@@ -1288,10 +1338,9 @@ PMN_DROPSQL('drop index enrollment_patid');
 
 INSERT INTO enrollment(PATID, ENR_START_DATE, ENR_END_DATE, CHART, ENR_BASIS) 
 with pats_delta as (
-  -- If only one visit, visit_delta_days will be 0
   select patient_num, max(start_date) - min(start_date) visit_delta_days
   from i2b2visit
-  where start_date > add_months(sysdate, -&&enrollment_months_back)
+  where start_date > add_months(sysdate, -36)
   group by patient_num
   ),
 enrolled as (
@@ -1323,10 +1372,11 @@ In the same function, I got
 So, I just altered the table to have the referenced column.
 
 */
+--/
 whenever sqlerror continue;
 drop table priority;
 drop table location;
-
+/
 create table priority (
   patient_num number(38,0),
 	encounter_num number(38,0),
@@ -1345,11 +1395,12 @@ create table location (
 	result_loc varchar2(50 byte)
   );
 
-alter table "&&i2b2_meta_schema".pcornet_lab add (
+alter table "BLUEHERONMETADATA".pcornet_lab add (
   pcori_specimen_source varchar2(1000) -- arbitrary
   );
 whenever sqlerror exit;
 
+--/
 create or replace procedure PCORNetLabResultCM as
 sqltext varchar2(4000);
 begin
@@ -1485,7 +1536,7 @@ END PCORNetLabResultCM;
 
 
 
-
+--/
 create or replace procedure PCORNetHarvest as
 begin
 
@@ -1578,6 +1629,7 @@ create table supply(
 
 whenever sqlerror exit;
 
+--/
 create or replace procedure PCORNetPrescribing as
 sqltext varchar2(4000);
 begin
@@ -1735,11 +1787,11 @@ create table amount(
 	concept_cd varchar2(50 byte)
   ); 
 
-alter table "&&i2b2_meta_schema".pcornet_med add (
+alter table "BLUEHERONMETADATA".pcornet_med add (
   pcori_ndc varchar2(1000) -- arbitrary
   );
 whenever sqlerror exit;
-
+--/
 create or replace procedure PCORNetDispensing as
 sqltext varchar2(4000);
 begin
@@ -1811,7 +1863,7 @@ end PCORNetDispensing;
 
 
 
-
+--/
 create or replace PROCEDURE pcornetReport
 as
 i2b2pats  number;
@@ -1874,7 +1926,7 @@ end pcornetReport;
 
 
 
-
+--/
 create or replace procedure pcornetloader as
 begin
 ---pcornetclear;
@@ -1914,7 +1966,7 @@ PCORNetHarvest;
 end pcornetloader;
 /
 
-
+--/
 BEGIN
 pcornetloader; --- you may want to run sql statements one by one in the pcornetloader procedure :)
 END;
